@@ -66,7 +66,7 @@ import os
 
 HERE=os.path.dirname(os.path.dirname(__file__))
 
-STATIC_ROOT = os.path.join(HERE,'static').replace('\\','/')
+STATIC_ROOT1 = os.path.join(HERE,'static').replace('\\','/')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -77,7 +77,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    'static/',
+    STATIC_ROOT1,
 )
 
 # List of finder classes that know how to find static files in
@@ -128,9 +128,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'account',
 )
 # Context processors
 TEMPLATE_CONTEXT_PROCESSORS = (
