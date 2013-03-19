@@ -72,76 +72,64 @@ class OrderedModel(models.Model):
         ordering = ["order"]
         abstract = True
 
-
-class Form(OrderedModel):
-	"""form model"""
-	
-	title = models.CharField(u'问卷标题', max_length=80)
-	deadline = models.DateField(u'过期时间')
-	submit_datetime = models.DateTimeField(u'添加时间', auto_now_add=True)
-	
-	def __unicode__(self):
-		return self.title
-	
-	class Meta:
-		db_table = 'form'
-		verbose_name = verbose_name_plural = u'问卷'
-		ordering = ['-order']
-
-class Ans(models.Model):
-	"""ans model"""
-	
-	title = models.CharField(u'答案', max_length=80)
-	#question = models.ManyToManyField(Question)
-	
-	def __unicode__(self):
-		return self.title
-	
-	class Meta:
-		db_table = 'ans'
-		verbose_name = verbose_name_plural = u'答案'
-
-class Question(models.Model):
-	"""question model"""
-	
-	title = models.CharField(u'问题', max_length=80)
-	form = models.ForeignKey(Form)
-	ans = models.ManyToManyField(Ans)
-	
-	def __unicode__(self):
-		return self.title
-	
-	class Meta:
-		db_table = 'question'
-		verbose_name = verbose_name_plural = u'问题'
-
-class Submit(models.Model):
-    """docstring for Submit"""
+class Record(models.Model):
+    """docstring for Record"""
     
-    form = models.ForeignKey(Form)
     user = models.ForeignKey(User)
+    road = models.CharField(u'路段ID', max_length=80)
+    start_time = models.DateTimeField(u'开始时间')
+    end_time = models.DateTimeField(u'结束时间')
     submit_datetime = models.DateTimeField(u'添加时间', auto_now_add=True)
 
     def __unicode__(self):
-        return self.form.title+self.user.username
-    
-    class Meta:
-        db_table = 'submit'
-        verbose_name = verbose_name_plural = u'问卷提交'
+        return self.user.username+self.road
 
-class Subitem(models.Model):
-    """Subitem model"""
+    def delta(self):
+        return int((self.end_time-self.start_time).total_seconds()/60)
     
-    submit = models.ForeignKey(Submit)
-    question = models.ForeignKey(Question)
-    ans = models.ForeignKey(Ans)
-    
-    def __unicode__(self):
-        return self.question.title+self.ans.title
-    
-    class Meta:
-        db_table = 'subitem'
-        verbose_name = verbose_name_plural = u'提交项'
+    @staticmethod
+    def summary_by_user_road(user,road):
+        record = {}
+        record['road'] = road
+        total_time = int(0)
+        _list = Record.objects.filter(user=user,road=road)
+        record['times'] = _list.count()
+        for item in _list:
+            total_time += item.delta()
+        record['total_time'] = total_time
+        return record
+    @staticmethod
+    def list_by_user(user):
+        _list = []
+        _records = Record.objects.filter(user=user)
+        s = set()
+        for item in _records:
+            if item.road not in s:
+                _list.append(Record.summary_by_user_road(user,item.road))
+                s.add(item.road)
+        return _list
+    @staticmethod
+    def summary_by_user(user):
+        result = {}
+        result['user'] = user
+        result['username'] = user.username
+        records = Record.objects.filter(user=user)
+        result['times'] = int(records.count())
+        result['total_time'] = int(0)
+        for item in records:
+            result['total_time'] += item.delta()
+        return result
+    @staticmethod
+    def list():
+        _list = []
+        users = User.objects.all()
+        for user in users:
+            _list.append(Record.summary_by_user(user))
+        return _list
 
+    class Meta:
+        db_table = 'record'
+        verbose_name = verbose_name_plural = u'行车记录'
+        ordering = ['-submit_datetime']
 
 
