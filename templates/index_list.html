@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div >
+      <div class="head">
+        <h1>
+          驾驶记录
+        </h1>
+      </div>
+      <div class="statistic">
+        <div class="tip">
+          <span>总使用人数:</span> {{ summary.user_num }}
+        </div>
+        <div class="tip">
+          <span>总驾驶次数:</span> {{ summary.total_times }}
+        </div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>姓名</th>
+            <th>驾驶次数</th>
+            <th>已行驶(分钟)</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        	{% for record in records %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ record.username }}</td>
+            <td>{{ record.times }}</td>            
+            <td>{{ record.total_time }}</td>
+            <td>
+            	<a href="/record-user/{{ record.user.id }}">
+            		<button class="btn btn-primary">详细</button>
+            	</a>
+            </td>
+          </tr>
+          	{% endfor %}
+          
+        </tbody>
+      </table>
+</div>
+
+{% endblock %}
